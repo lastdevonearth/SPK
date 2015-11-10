@@ -1,4 +1,4 @@
-sspks 0.1
+SPK-Server
 =====
 
 A very simple Synology Package Server, reverse engineered from
@@ -17,4 +17,4 @@ Contribute
 =====
 
 Feel free to contribute, improve the code or the design by forking
-https://github.com/jdel/sspks.git
+https://github.com/lastdevonearth/SPK-Server.git
