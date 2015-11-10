@@ -22,10 +22,10 @@ h1 {
     margin: 0;
     padding: 0 1em 0 1em;
     display: inline;
-    border-right: 1px solid #fff;
+    border-left: 1px solid #fff;
 }
 
-#menu ul li.last {
+#menu ul li.first {
     border: 0;
 }
 
