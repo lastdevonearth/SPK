@@ -12,7 +12,6 @@ build = 2636
 package_update_channel = stable
 */
 
-$siteName = "SPK Server";
 $spkDir = "packages/";  // This has to be a directory relative to
                         // where this  script is and served by Apache
 $synologyModels = "conf/synology_models.conf";  // File where Syno models are
@@ -21,8 +20,10 @@ $synologyModels = "conf/synology_models.conf";  // File where Syno models are
 $excludedSynoServices = array("apache-sys","apache-web","mdns","samba","db","applenetwork","cron","nfs","firewall");
 $host = $_SERVER['HTTP_HOST'].substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], "/"))."/";
 
-if($_SERVER['REQUEST_METHOD'] == 'POST')
-{
+$siteName = "QUEMENEUR SPK Server";
+
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+
     $language = trim($_POST['language']);
     $timezone = trim($_POST['timezone']);
     $arch = trim($_POST['arch']);
@@ -32,8 +33,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST')
     $channel = trim($_POST['package_update_channel']);
     $unique = trim($_POST['unique']);
 
-    if (!$language || !$timezone || !$arch || !$major || is_null($minor) || !$build || !$channel || !$unique || !preg_match("/^$unique/", $_SERVER['HTTP_USER_AGENT']))
-	{
+    if (!$language || !$timezone || !$arch || !$major || is_null($minor) || !$build || !$channel || !$unique || !preg_match("/^$unique/", $_SERVER['HTTP_USER_AGENT'])){
         header('Content-type: text/html');
         header('HTTP/1.1 404 Not Found');
         header('Status: 404 Not Found');
@@ -78,8 +78,7 @@ elseif($_SERVER['REQUEST_METHOD'] == 'GET')
     echo "\t\t</div>\n";
     echo "\t\t<div id=\"content\">\n";
     echo "\t\t\t<ul>\n";
-    if ($arch)
-	{
+    if ($arch){
         DisplayPackagesHTML(GetPackageList($arch, $channel, "skip"));
     } elseif ($fullList) {
         DisplayAllPackages($spkDir);
@@ -102,16 +101,13 @@ else
     header('Status: 404 Not Found');
 }
 
-function GetPackageList($arch="noarch", $beta=false, $version="")
-{
+function GetPackageList($arch="noarch", $beta=false, $version="") {
     global $host;
     global $spkDir;
     $packagesList = GetDirectoryList($spkDir, ".*\.nfo");
     $packagesAvailable = array();
-    if (!empty($packagesList))
-	{
-        foreach($packagesList as $nfoFile)
-		{
+    if (!empty($packagesList)){
+        foreach($packagesList as $nfoFile){
             $packageInfo = array();
             $spkFile = basename($nfoFile, ".nfo").".spk";
             $thumb_72 = basename($nfoFile, ".nfo")."_thumb_72.png";
@@ -126,20 +122,17 @@ function GetPackageList($arch="noarch", $beta=false, $version="")
                 fclose($fileHandle);
                 $packageInfo['nfo'] = $spkDir.$nfoFile;
                 $packageInfo['spk'] = $spkDir.$spkFile;
-                if(file_exists($spkDir.$thumb_72))
-				{
+                if(file_exists($spkDir.$thumb_72)){
                     $packageInfo['thumbnail'][] = "http://".$host.$spkDir.$thumb_72;
                 } else {
                     $packageInfo['thumbnail'][] = "http://".$host.$spkDir."default_package_icon_72.png";
                 }
-                if(file_exists($spkDir.$thumb_120))
-				{
+                if(file_exists($spkDir.$thumb_120)){
                     $packageInfo['thumbnail'][] = "http://".$host.$spkDir.$thumb_120;
                 } else {
                     $packageInfo['thumbnail'][] = "http://".$host.$spkDir."default_package_icon_120.png";
                 }
-                foreach(GetDirectoryList($spkDir, basename($nfoFile, ".nfo").".*_screen_.*\.png") as $snapshot)
-				{
+                foreach(GetDirectoryList($spkDir, basename($nfoFile, ".nfo").".*_screen_.*\.png") as $snapshot){
                     $packageInfo['snapshot'][] = "http://".$host.$spkDir.$snapshot;
                 }
                 if (    (empty($packagesAvailable[$packageInfo['package']])
@@ -147,8 +140,7 @@ function GetPackageList($arch="noarch", $beta=false, $version="")
                     && ($packageInfo['arch'] == $arch || $packageInfo['arch'] == "noarch")
                     && (($beta == "beta" && $packageInfo['beta'] == true) || empty($packageInfo['beta']))
                     && ((version_compare($version, $packageInfo['firmware'], ">=")) || $version == "skip")
-                    ) 
-				{
+                    ) {
                     $packagesAvailable[$packageInfo['package']] = $packageInfo;
                 }
             }
@@ -157,11 +149,9 @@ function GetPackageList($arch="noarch", $beta=false, $version="")
     return $packagesAvailable;
 }
 
-function DisplayPackagesHTML($packagesAvailable)
-{
+function DisplayPackagesHTML($packagesAvailable){
     global $host;
-    foreach($packagesAvailable as $packageInfo)
-	{
+    foreach($packagesAvailable as $packageInfo){
         echo "\t\t\t\t<li class=\"package\">\n";
         echo "\t\t\t\t\t<div class=\"spk-icon\">\n";
         echo "\t\t\t\t\t\t<a href=\"http://".$host.$packageInfo['spk']."\"><img src=\"".$packageInfo['thumbnail'][0]."\" alt=\"".$packageInfo["displayname"]."\" />".($packageInfo['beta']?"<ins></ins>":"")."</a>\n";
@@ -170,8 +160,7 @@ function DisplayPackagesHTML($packagesAvailable)
         echo "\t\t\t\t\t\t<span class=\"spk-title\">".$packageInfo["displayname"]." v".$packageInfo["version"]."</span><br />\n";
         echo "\t\t\t\t\t\t<p class=\"dsm-version\">Minimum DSM verison: ".$packageInfo["firmware"]."</p>\n";
         echo "\t\t\t\t\t\t<p>".$packageInfo["description"]."</p>\n";
-		if (true)
-		{        
+		if (true){        
 			echo " <a id=\"".$packageInfo['package']."_show\" href=\"#nogo\" onclick=\"Effect.toggle('".$packageInfo['package']."_detail', 'blind', { duration: 0.5 }); Effect.toggle('".$packageInfo['package']."_show', 'appear', { duration: 0.3 }); Effect.toggle('".$packageInfo['package']."_hide', 'appear', { duration: 0.3, delay: 0.5 }); return false;\">More...</a>";
 			echo " <a id=\"".$packageInfo['package']."_hide\" href=\"#nogo\" onclick=\"Effect.toggle('".$packageInfo['package']."_detail', 'blind', { duration: 0.5 }); Effect.toggle('".$packageInfo['package']."_hide', 'appear', { duration: 0.3 }); Effect.toggle('".$packageInfo['package']."_show', 'appear', { duration: 0.3, delay: 0.5 }); return false;\" style=\"display: none;\">Hide</a>\n";
 			echo "\t\t\t\t\t\t</p>\n";
@@ -181,8 +170,8 @@ function DisplayPackagesHTML($packagesAvailable)
 			echo "\t\t\t\t\t\t\t<tr><td>Package</td><td>: &nbsp;".$packageInfo["package"]."</td></tr>\n";
 			echo "\t\t\t\t\t\t\t<tr><td>Version</td><td>: &nbsp;".$packageInfo["version"]."</td></tr>\n";
 			echo "\t\t\t\t\t\t\t<tr><td>Dependencies</td><td>: &nbsp;".""."</td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Maintainer</td><td>: &nbsp;<a href=\"\">".$packageInfo["maintainer"]."</a></td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Distributor</td><td>: &nbsp;<a href=\"\">".""."</a></td></tr>\n";
+			echo "\t\t\t\t\t\t\t<tr><td>Maintainer</td><td>: &nbsp;<a href=\"".$packageInfo["maintainer_url"]."\">".$packageInfo["maintainer"]."</a></td></tr>\n";
+			echo "\t\t\t\t\t\t\t<tr><td>Distributor</td><td>: &nbsp;<a href=\"".$packageInfo["distributor_url"]."\">".$packageInfo["distributor"]."</a></td></tr>\n";
 			echo "\t\t\t\t\t\t\t<tr><td>Architecture</td><td>: &nbsp;".$packageInfo["arch"]."</td></tr>\n";
 			echo "\t\t\t\t\t\t\t<tr><td>Firmware</td><td>: &nbsp;".$packageInfo["firmware"]."</td></tr>\n";
 			echo "\t\t\t\t\t\t</table>\n";
@@ -193,13 +182,11 @@ function DisplayPackagesHTML($packagesAvailable)
     }
 }
 
-function DisplayPackagesJSON($packagesAvailable)
-{
+function DisplayPackagesJSON($packagesAvailable){
     $packagesJSON = array();
     global $host;
     global $excludedSynoServices;
-    foreach($packagesAvailable as $packageInfo)
-	{
+    foreach($packagesAvailable as $packageInfo){
         $packageJSON = array(
         "package" => $packageInfo["package"],
         "version" => $packageInfo["version"],
@@ -235,8 +222,7 @@ function DisplayPackagesJSON($packagesAvailable)
     return $packagesJSON;
 }
 
-function DisplayAllPackages() 
-{
+function DisplayAllPackages() {
         global $spkDir;
         global $host;
         $packagesList = GetDirectoryList($spkDir, ".*\.spk");
@@ -245,10 +231,8 @@ function DisplayAllPackages()
         }
 }
 
-function DisplaySynoModels($synologyModelsFile) 
-{
-    if(file_exists($synologyModelsFile))
-	{
+function DisplaySynoModels($synologyModelsFile) {
+    if(file_exists($synologyModelsFile)){
         $synologyModels = array();
         $fileHandle = fopen($synologyModelsFile, 'r');
         while(!feof($fileHandle))
@@ -258,8 +242,7 @@ function DisplaySynoModels($synologyModelsFile)
         }
         fclose($fileHandle);
         ksort($synologyModels);
-        foreach ($synologyModels as $synoName => $synoArch)
-		{
+        foreach ($synologyModels as $synoName => $synoArch){
             echo "\t\t\t\t<li class=\"syno-model\"><a href=\"?arch=".$synoArch."\">".$synoName."</a></li>\n";
         }
     } else  {
@@ -270,10 +253,8 @@ function DisplaySynoModels($synologyModelsFile)
 function GetDirectoryList ($directory, $filter){
     $results = array();
     $handler = opendir($directory);
-    while ($file = readdir($handler))
-	{
-        if ($file != "." && $file != ".." && preg_match("/".$filter."/", $file))
-		{
+    while ($file = readdir($handler)) {
+        if ($file != "." && $file != ".." && preg_match("/".$filter."/", $file)) {
               $results[] = $file;
         }
     }
