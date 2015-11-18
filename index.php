@@ -12,15 +12,12 @@ build = 2636
 package_update_channel = stable
 */
 
-$spkDir = "packages/";  // This has to be a directory relative to
-                        // where this  script is and served by Apache
-$synologyModels = "conf/synology_models.conf";  // File where Syno models are
-                                                // stored in "DS412+=cedarview"
-                                                // type format
+$spkDir = "packages/";  // This has to be a directory relative to where this script is and served by Apache
+$synologyModels = "conf/synology_models.conf";  // File where Syno models are stored in "DS412+=cedarview"  type format
 $excludedSynoServices = array("apache-sys","apache-web","mdns","samba","db","applenetwork","cron","nfs","firewall");
 $host = $_SERVER['HTTP_HOST'].substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], "/"))."/";
 
-$siteName = "QUEMENEUR SPK Server";
+$siteName = "The Last Developer On Earth SPK Server";
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
@@ -49,50 +46,62 @@ elseif($_SERVER['REQUEST_METHOD'] == 'GET')
     $arch = trim($_GET['arch']);
     $channel = trim($_GET['channel']);
     $fullList = trim($_GET['fulllist']);
+    $dspk = trim($_GET['dspk']);
     $packagesAvailable = array();
-
-    header('Content-type: text/html');
-    echo "<!DOCTYPE html>\n";
-    echo "<html>\n";
-    echo "\t<head>\n";
-    echo "\t\t<title>".$siteName."</title>\n";
-    echo "\t\t<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n";
-    echo "\t\t<script src=\"data/js/lib/prototype.js\" type=\"text/javascript\"></script>\n";
-    echo "\t\t<script src=\"data/js/src/scriptaculous.js\" type=\"text/javascript\"></script>\n";
-    echo "\t\t<link rel=\"stylesheet\" href=\"data/css/style.css\" type=\"text/css\" />\n";
-    echo "\t\t<link rel=\"stylesheet\" href=\"data/css/style_mobile.css\" type=\"text/css\" media=\"handheld\"/>\n";
-    echo "\t</head>\n";
-    echo "\t<body>\n";
-    echo "\t\t<h1>".$siteName."</h1>\n";
-    echo "\t\t<div id=\"menu\">\n";
-    echo "\t\t\t<ul>\n";
-    echo "\t\t\t\t<li class=\"first\"><a href=\".\">Synology Models</a></li>\n";
-    echo ($arch && !$channel)?"\t\t\t\t<li><a href=\"".$_SERVER['REQUEST_URI']."&channel=beta\">Show Beta Packages</a></li>\n":"";
-    echo $channel?"\t\t\t\t<li><a href=\"index.php?arch=".$arch."\">Hide Beta Packages</a></li>\n":"";
-    echo !$fullList?"\t\t\t\t<li><a href=\"index.php?fulllist=true\">Full Packages List</a></li>\n":"";
-    //echo "\t\t\t\t<li><a href=\"http://github.com/jdel/sspks\">Host your own packages</a></li>\n";
-    echo "\t\t\t</ul>\n";
-    echo "\t\t</div>\n";
-    echo "\t\t<div id=\"source-info\">\n";
-    echo "\t\t\t<p>Add <span>http://".$host."</span> to your Synology NAS Package Center sources !</p>\n";
-    echo "\t\t</div>\n";
-    echo "\t\t<div id=\"content\">\n";
-    echo "\t\t\t<ul>\n";
-    if ($arch){
-        DisplayPackagesHTML(GetPackageList($arch, $channel, "skip"));
-    } elseif ($fullList) {
-        DisplayAllPackages($spkDir);
+	if ($dspk)
+	{
+		$countFile = $dspk.'.txt';
+		//$hit_count = @file_get_contents($countFile); // read the hit count from file
+		$hit_count = (empty($hit_count))?0:$hit_count;
+		$hit_count++; // increment the hit count by 1
+		//@file_put_contents($countFile, $hit_count); // store the new hit count
+		$redir = 'http://'.$host.$dspk;
+		echo $redir;
+		//header('Location: http://'.$host.$dspk); // redirect to the real file to be downloaded
     } else {
-        DisplaySynoModels($synologyModels);
-    }
-    echo "\t\t\t</ul>\n";
-    echo "\t\t</div>\n";
-    /*echo "\t\t<hr />\n";
-    echo "\t\t<div id=\"footer\">\n";
-    echo "\t\t\t<p>Help this website get better on <a href=\"http://github.com/jdel/sspks\">Github</a></p>\n";
-    echo "\t\t</div>\n";*/
-    echo "\t</body>\n";
-    echo "</html>";
+		header('Content-type: text/html');
+		echo "<!DOCTYPE html>\n";
+		echo "<html>\n";
+		echo "\t<head>\n";
+		echo "\t\t<title>".$siteName."</title>\n";
+		echo "\t\t<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n";
+		echo "\t\t<script src=\"data/js/lib/prototype.js\" type=\"text/javascript\"></script>\n";
+		echo "\t\t<script src=\"data/js/src/scriptaculous.js\" type=\"text/javascript\"></script>\n";
+		echo "\t\t<link rel=\"stylesheet\" href=\"data/css/style.css\" type=\"text/css\" />\n";
+		echo "\t\t<link rel=\"stylesheet\" href=\"data/css/style_mobile.css\" type=\"text/css\" media=\"handheld\"/>\n";
+		echo "\t</head>\n";
+		echo "\t<body>\n";
+		echo "\t\t<h1>".$siteName."</h1>\n";
+		echo "\t\t<div id=\"menu\">\n";
+		echo "\t\t\t<ul>\n";
+		echo "\t\t\t\t<li class=\"first\"><a href=\".\">Synology Models</a></li>\n";
+		echo ($arch && !$channel)?"\t\t\t\t<li><a href=\"".$_SERVER['REQUEST_URI']."&channel=beta\">Show Beta Packages</a></li>\n":"";
+		echo $channel?"\t\t\t\t<li><a href=\"index.php?arch=".$arch."\">Hide Beta Packages</a></li>\n":"";
+		echo !$fullList?"\t\t\t\t<li><a href=\"index.php?fulllist=true\">Full Packages List</a></li>\n":"";
+		//echo "\t\t\t\t<li><a href=\"http://github.com/jdel/sspks\">Host your own packages</a></li>\n";
+		echo "\t\t\t</ul>\n";
+		echo "\t\t</div>\n";
+		echo "\t\t<div id=\"source-info\">\n";
+		echo "\t\t\t<p>Add <span>http://".$host."</span> to your Synology NAS Package Center sources !</p>\n";
+		echo "\t\t</div>\n";
+		echo "\t\t<div id=\"content\">\n";
+		echo "\t\t\t<ul>\n";
+		if ($arch){
+			DisplayPackagesHTML(GetPackageList($arch, $channel, "skip"));
+		} elseif ($fullList) {
+			DisplayAllPackages($spkDir);
+		} else {
+			DisplaySynoModels($synologyModels);
+		}
+		echo "\t\t\t</ul>\n";
+		echo "\t\t</div>\n";
+		/*echo "\t\t<hr />\n";
+		echo "\t\t<div id=\"footer\">\n";
+		echo "\t\t\t<p>Help this website get better on <a href=\"http://github.com/jdel/sspks\">Github</a></p>\n";
+		echo "\t\t</div>\n";*/
+		echo "\t</body>\n";
+		echo "</html>";
+	}
 }
 else
 {
@@ -101,18 +110,22 @@ else
     header('Status: 404 Not Found');
 }
 
-function GetPackageList($arch="noarch", $beta=false, $version="") {
+function GetPackageList($arch="noarch", $beta=false, $version="")
+{
     global $host;
     global $spkDir;
     $packagesList = GetDirectoryList($spkDir, ".*\.nfo");
     $packagesAvailable = array();
-    if (!empty($packagesList)){
-        foreach($packagesList as $nfoFile){
+    if (!empty($packagesList))
+	{
+        foreach($packagesList as $nfoFile)
+		{
             $packageInfo = array();
             $spkFile = basename($nfoFile, ".nfo").".spk";
             $thumb_72 = basename($nfoFile, ".nfo")."_thumb_72.png";
             $thumb_120 = basename($nfoFile, ".nfo")."_thumb_120.png";
-            if(file_exists($spkDir.$nfoFile) && file_exists($spkDir.$spkFile)){
+            if(file_exists($spkDir.$nfoFile) && file_exists($spkDir.$spkFile))
+			{
                 $fileHandle = fopen($spkDir.$nfoFile, 'r');
                 while(!feof($fileHandle))
                 {
@@ -122,12 +135,14 @@ function GetPackageList($arch="noarch", $beta=false, $version="") {
                 fclose($fileHandle);
                 $packageInfo['nfo'] = $spkDir.$nfoFile;
                 $packageInfo['spk'] = $spkDir.$spkFile;
-                if(file_exists($spkDir.$thumb_72)){
+                if(file_exists($spkDir.$thumb_72))
+				{
                     $packageInfo['thumbnail'][] = "http://".$host.$spkDir.$thumb_72;
                 } else {
                     $packageInfo['thumbnail'][] = "http://".$host.$spkDir."default_package_icon_72.png";
                 }
-                if(file_exists($spkDir.$thumb_120)){
+                if(file_exists($spkDir.$thumb_120))
+				{
                     $packageInfo['thumbnail'][] = "http://".$host.$spkDir.$thumb_120;
                 } else {
                     $packageInfo['thumbnail'][] = "http://".$host.$spkDir."default_package_icon_120.png";
@@ -135,13 +150,14 @@ function GetPackageList($arch="noarch", $beta=false, $version="") {
                 foreach(GetDirectoryList($spkDir, basename($nfoFile, ".nfo").".*_screen_.*\.png") as $snapshot){
                     $packageInfo['snapshot'][] = "http://".$host.$spkDir.$snapshot;
                 }
-                if (    (empty($packagesAvailable[$packageInfo['package']])
+                if ((empty($packagesAvailable[$packageInfo['package']])
                     || version_compare($packageInfo['version'], $packagesAvailable[$packageInfo['package']]['version'], ">"))
                     && ($packageInfo['arch'] == $arch || $packageInfo['arch'] == "noarch")
                     && (($beta == "beta" && $packageInfo['beta'] == true) || empty($packageInfo['beta']))
                     && ((version_compare($version, $packageInfo['firmware'], ">=")) || $version == "skip")
-                    ) {
-                    $packagesAvailable[$packageInfo['package']] = $packageInfo;
+                    ) 
+					{
+						$packagesAvailable[$packageInfo['package']] = $packageInfo;
                 }
             }
         }
@@ -149,31 +165,58 @@ function GetPackageList($arch="noarch", $beta=false, $version="") {
     return $packagesAvailable;
 }
 
-function DisplayPackagesHTML($packagesAvailable){
+function DisplayPackagesHTML($packagesAvailable)
+{
     global $host;
-    foreach($packagesAvailable as $packageInfo){
+    foreach($packagesAvailable as $packageInfo)
+	{
         echo "\t\t\t\t<li class=\"package\">\n";
         echo "\t\t\t\t\t<div class=\"spk-icon\">\n";
-        echo "\t\t\t\t\t\t<a href=\"http://".$host.$packageInfo['spk']."\"><img src=\"".$packageInfo['thumbnail'][0]."\" alt=\"".$packageInfo["displayname"]."\" />".($packageInfo['beta']?"<ins></ins>":"")."</a>\n";
+		$imgSrc = $packageInfo['thumbnail'][0];
+		$packageIcon = $packageInfo['package_icon'];
+		if(!empty($packageInfo['package_icon']))
+		{
+			$imgSrc = "data:image/png;base64," . $packageInfo['package_icon'];
+		}
+        echo "\t\t\t\t\t\t<a href=\"http://".$host.$packageInfo['spk']."\"><img src=\"".$imgSrc."\" alt=\"".$packageInfo["displayname"]."\" />".($packageInfo['beta']?"<ins></ins>":"")."</a>\n";
         echo "\t\t\t\t\t</div>\n";
         echo "\t\t\t\t\t<div class=\"spk-desc\">\n";
-        echo "\t\t\t\t\t\t<span class=\"spk-title\">".$packageInfo["displayname"]." v".$packageInfo["version"]."</span><br />\n";
-        echo "\t\t\t\t\t\t<p class=\"dsm-version\">Minimum DSM verison: ".$packageInfo["firmware"]."</p>\n";
-        echo "\t\t\t\t\t\t<p>".$packageInfo["description"]."</p>\n";
-		if (true){        
-			echo " <a id=\"".$packageInfo['package']."_show\" href=\"#nogo\" onclick=\"Effect.toggle('".$packageInfo['package']."_detail', 'blind', { duration: 0.5 }); Effect.toggle('".$packageInfo['package']."_show', 'appear', { duration: 0.3 }); Effect.toggle('".$packageInfo['package']."_hide', 'appear', { duration: 0.3, delay: 0.5 }); return false;\">More...</a>";
-			echo " <a id=\"".$packageInfo['package']."_hide\" href=\"#nogo\" onclick=\"Effect.toggle('".$packageInfo['package']."_detail', 'blind', { duration: 0.5 }); Effect.toggle('".$packageInfo['package']."_hide', 'appear', { duration: 0.3 }); Effect.toggle('".$packageInfo['package']."_show', 'appear', { duration: 0.3, delay: 0.5 }); return false;\" style=\"display: none;\">Hide</a>\n";
+        echo "\t\t\t\t\t\t<span class=\"spk-title\">".$packageInfo["displayname"]."</span><br />\n";
+        echo "\t\t\t\t\t\t<p class=\"dsm-version\">Minimum DSM version: ".$packageInfo["firmware"]."</p>\n";
+		$description = $packageInfo["description"];
+		if(!empty($packageInfo['description_fre']))
+		{
+			$description = $packageInfo['description_fre'];
+		}
+        echo "\t\t\t\t\t\t<p>".$description."</p>\n";
+		if (true)
+		{        
+			echo " <a id=\"".$packageInfo['package']."_show\" href=\"#nogo\" onclick=\"Effect.toggle('".$packageInfo['package']."_detail', 'blind', { duration: 0.5 }); Effect.toggle('".$packageInfo['package']."_show', 'appear', { duration: 0.3 }); Effect.toggle('".$packageInfo['package']."_hide', 'appear', { duration: 0.3, delay: 0.5 }); return false;\">[+]</a>";
+			echo " <a id=\"".$packageInfo['package']."_hide\" href=\"#nogo\" onclick=\"Effect.toggle('".$packageInfo['package']."_detail', 'blind', { duration: 0.5 }); Effect.toggle('".$packageInfo['package']."_hide', 'appear', { duration: 0.3 }); Effect.toggle('".$packageInfo['package']."_show', 'appear', { duration: 0.3, delay: 0.5 }); return false;\" style=\"display: none;\">[-]</a>\n";
 			echo "\t\t\t\t\t\t</p>\n";
 			echo "\t\t\t\t\t\t<div style=\"display: none;\" id=\"".$packageInfo['package']."_detail\">\n";
 			echo "\t\t\t\t\t\t<table>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Display Name</td><td>: &nbsp;".$packageInfo["displayname"]."</td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Package</td><td>: &nbsp;".$packageInfo["package"]."</td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Version</td><td>: &nbsp;".$packageInfo["version"]."</td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Dependencies</td><td>: &nbsp;".""."</td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Maintainer</td><td>: &nbsp;<a href=\"".$packageInfo["maintainer_url"]."\">".$packageInfo["maintainer"]."</a></td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Distributor</td><td>: &nbsp;<a href=\"".$packageInfo["distributor_url"]."\">".$packageInfo["distributor"]."</a></td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Architecture</td><td>: &nbsp;".$packageInfo["arch"]."</td></tr>\n";
-			echo "\t\t\t\t\t\t\t<tr><td>Firmware</td><td>: &nbsp;".$packageInfo["firmware"]."</td></tr>\n";
+			//if(!empty($packageInfo["displayname"])) echo "\t\t\t\t\t\t\t<tr><td>Display Name</td><td>: &nbsp;".$packageInfo["displayname"]."</td></tr>\n";
+			if(!empty($packageInfo["package"])) echo "\t\t\t\t\t\t\t<tr><td>Package</td><td>: &nbsp;".$packageInfo["package"]."</td></tr>\n";
+			if(!empty($packageInfo["version"])) echo "\t\t\t\t\t\t\t<tr><td>Version</td><td>: &nbsp;".$packageInfo["version"]."</td></tr>\n";
+			if(!empty($packageInfo["changelog"])) echo "\t\t\t\t\t\t\t<tr><td>Change log</td><td>: &nbsp;".$packageInfo["changelog"]."</td></tr>\n";
+			if(!empty($packageInfo["install_dep_services"])) echo "\t\t\t\t\t\t\t<tr><td>Dependencies</td><td>: &nbsp;".trim(str_replace($excludedSynoServices, "", $packageInfo['install_dep_services']))."</td></tr>\n";
+			if(!empty($packageInfo["maintainer"])) 
+			{
+				echo "\t\t\t\t\t\t\t<tr><td>Maintainer</td><td>: &nbsp;";
+				if(!empty($packageInfo["maintainer_url"])) echo "<a href=\"".$packageInfo["maintainer_url"]."\" target=\"_new\">";
+				echo $packageInfo["maintainer"];
+				if(!empty($packageInfo["maintainer_url"])) echo "</a></td></tr>\n";
+			}
+			if(!empty($packageInfo["distributor"]))
+			{
+				echo "\t\t\t\t\t\t\t<tr><td>Distributor</td><td>: &nbsp;";
+				if(!empty($packageInfo["distributor_url"])) echo "<a href=\"".$packageInfo["distributor_url"]."\" target=\"_new\">";
+				echo $packageInfo["distributor"];
+				if(!empty($packageInfo["distributor_url"])) echo "</a></td></tr>\n";
+			}
+			if(!empty($packageInfo["arch"])) echo "\t\t\t\t\t\t\t<tr><td>Architecture</td><td>: &nbsp;".$packageInfo["arch"]."</td></tr>\n";
+			if(!empty($packageInfo["firmware"])) echo "\t\t\t\t\t\t\t<tr><td>Firmware</td><td>: &nbsp;".$packageInfo["firmware"]."</td></tr>\n";
 			echo "\t\t\t\t\t\t</table>\n";
 			echo "\t\t\t\t\t\t</div>\n";
 		}
@@ -182,56 +225,62 @@ function DisplayPackagesHTML($packagesAvailable){
     }
 }
 
-function DisplayPackagesJSON($packagesAvailable){
+function DisplayPackagesJSON($packagesAvailable)
+{
     $packagesJSON = array();
     global $host;
     global $excludedSynoServices;
-    foreach($packagesAvailable as $packageInfo){
+    foreach($packagesAvailable as $packageInfo)
+	{
         $packageJSON = array(
-        "package" => $packageInfo["package"],
-        "version" => $packageInfo["version"],
-        "dname" => $packageInfo["displayname"],
-        "desc" => $packageInfo["description"],
-        "link" => "http://".$host.$packageInfo['spk'],
-        "md5" => md5_file($packageInfo['spk']),
-        "size" => filesize($packageInfo['spk']),
-        "qinst" => !empty($packageInfo['qinst'])?$packageInfo['qinst']:false,                               // quick install
-        "qstart" => !empty($packageInfo['start'])?$packageInfo['start']:false,                              // quick start
-        "depsers" => !empty($packageInfo['start_dep_services'])?$packageInfo['start_dep_services']:"",      // required started packages
-        "deppkgs" => !empty($packageInfo['install_dep_services'])?trim(str_replace($excludedSynoServices, "", $packageInfo['install_dep_services'])):"",
-                                                                                                            // required installed packages, skips the known syno services
-        "maintainer" => $packageInfo["maintainer"],
-		"maintainer_url" => $packageInfo["maintainer_url"],
-		"distributor" => $packageInfo["distributor"],
-		"distributor_url" => $packageInfo["distributor_url"],
-        "changelog" => !empty($packageInfo["changelog"])?$packageInfo["changelog"]:"",
-        "beta" => !empty($packageInfo['beta'])?$packageInfo['beta']:false,                                  // beta channel
-        "thumbnail" => $packageInfo['thumbnail'],                                                           // New property for newer synos, need to check if it works with old synos
-        "icon" => $packageInfo['thumbnail'][0],                                                             // Old icon property for pre 4.2 compatibility
-        //"icon" => $packageInfo['package_icon'],                                                           // Get icon from INFO file
+			"package" => $packageInfo["package"],
+			"version" => $packageInfo["version"],
+			"dname" => $packageInfo["displayname"],
+			"desc" => $packageInfo["description"],
+			"link" => "http://".$host.$packageInfo['spk'],
+			"md5" => md5_file($packageInfo['spk']),
+			"size" => filesize($packageInfo['spk']),
+			"qinst" => !empty($packageInfo['qinst'])?$packageInfo['qinst']:false,                               // quick install
+			"qstart" => !empty($packageInfo['start'])?$packageInfo['start']:false,                              // quick start
+			
+			"depsers" => !empty($packageInfo['start_dep_services'])?$packageInfo['start_dep_services']:"",      // required started packages
+			"deppkgs" => !empty($packageInfo['install_dep_services'])?trim(str_replace($excludedSynoServices, "", $packageInfo['install_dep_services'])):"",
+																												// required installed packages, skips the known syno services
+			"maintainer" => $packageInfo["maintainer"],
+			"maintainer_url" => $packageInfo["maintainer_url"],
+			"distributor" => $packageInfo["distributor"],
+			"distributor_url" => $packageInfo["distributor_url"],
+			"changelog" => !empty($packageInfo["changelog"])?$packageInfo["changelog"]:"",
+			"beta" => !empty($packageInfo['beta'])?$packageInfo['beta']:false,                                  // beta channel
+			"thumbnail" => $packageInfo['thumbnail'],                                                           // New property for newer synos, need to check if it works with old synos
+			"icon" => !empty($packageInfo['package_icon'])?$packageInfo['package_icon']:$packageInfo['thumbnail'][0],	
+																												// Get icon from INFO file or thumbnail
 
-        //"category" => 2,                                                                                  // New property introduced, no effect on othersources packages
-        //"download_count" => 6000,                                                                         // Will only display values over 1000
-        "price" => 0,                                                                                       // New property
-        //"recent_download_count" => 1222,                                                                  // Not sure what this does
-        "type" => 0,                                                                                        // New property introduced, no effect on othersources packages
-        "snapshot" => $packageInfo['snapshot']                                                              // Adds multiple screenshots to package view
+			//"category" => 2,                                                                                  // New property introduced, no effect on othersources packages
+			//"download_count" => 6000,                                                                         // Will only display values over 1000
+			"price" => 0,                                                                                       // New property
+			//"recent_download_count" => 1222,                                                                  // Not sure what this does
+			"type" => 0,                                                                                        // New property introduced, no effect on othersources packages
+			"snapshot" => $packageInfo['snapshot']                                                              // Adds multiple screenshots to package view
         );
         $packagesJSON[] = $packageJSON;
     }
     return $packagesJSON;
 }
 
-function DisplayAllPackages() {
+function DisplayAllPackages()
+{
         global $spkDir;
         global $host;
         $packagesList = GetDirectoryList($spkDir, ".*\.spk");
-        foreach($packagesList as $spkFile){
-                echo "\t\t\t\t<li><a href=\"http://".$host.$spkDir.$spkFile."\">".$spkFile."</a></li>\n";
+        foreach($packagesList as $spkFile)
+		{
+            echo "\t\t\t\t<li><a href=\"http://".$host.$spkDir.$spkFile."\">".$spkFile."</a></li>\n";
         }
 }
 
-function DisplaySynoModels($synologyModelsFile) {
+function DisplaySynoModels($synologyModelsFile)
+{
     if(file_exists($synologyModelsFile)){
         $synologyModels = array();
         $fileHandle = fopen($synologyModelsFile, 'r');
@@ -242,7 +291,8 @@ function DisplaySynoModels($synologyModelsFile) {
         }
         fclose($fileHandle);
         ksort($synologyModels);
-        foreach ($synologyModels as $synoName => $synoArch){
+        foreach ($synologyModels as $synoName => $synoArch)
+		{
             echo "\t\t\t\t<li class=\"syno-model\"><a href=\"?arch=".$synoArch."\">".$synoName."</a></li>\n";
         }
     } else  {
